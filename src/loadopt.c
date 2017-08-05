@@ -25,15 +25,15 @@
 #include "dp.h"
 #include "include/efivar/efiboot-loadopt.h"
 
-typedef struct efi_load_option_s {
+#include <sys/stat.h>
+
+struct efi_load_option_s {
 	uint32_t attributes;
 	uint16_t file_path_list_length;
 	uint16_t description[];
 	// uint8_t file_path_list[];
 	// uint8_t optional_data[];
-}
-__attribute__((packed))
-efi_load_option;
+} __attribute__((packed));
 
 ssize_t
 __attribute__((__nonnull__ (6)))

@@ -197,6 +197,7 @@ lcm(uint64_t x, uint64_t y)
 	return (x / n) * y;
 }
 
+#if 0
 /************************************************************
  * get_sector_size
  * Requires:
@@ -216,6 +217,7 @@ get_sector_size(int filedes)
 		sector_size = 512;
 	return sector_size;
 }
+#endif
 
 #define asprintfa(str, fmt, args...)					\
 	({								\

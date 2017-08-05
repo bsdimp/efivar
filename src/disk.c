@@ -18,7 +18,7 @@
  * <http://www.gnu.org/licenses/>.
  *
  */
-#include <asm/byteorder.h>
+#include <sys/endian.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>

@@ -5,67 +5,22 @@ include $(TOPDIR)/Make.version
 include $(TOPDIR)/Make.rules
 include $(TOPDIR)/Make.defaults
 
-LIBTARGETS=libefivar.so libefiboot.so
-STATICLIBTARGETS=libefivar.a libefiboot.a
-BINTARGETS=efivar efivar-static
-PCTARGETS=efivar.pc efiboot.pc
-TARGETS=$(LIBTARGETS) $(STATICLIBTARGETS) $(BINTARGETS) $(PCTARGETS)
+STATICLIBTARGETS=libefiboot.a
+BINTARGETS=
+PCTARGETS=efiboot.pc
+TARGETS=$(STATICLIBTARGETS) $(BINTARGETS) $(PCTARGETS)
 
-LIBEFIBOOT_SOURCES = crc32.c creator.c disk.c gpt.c linux.c loadopt.c
+LIBEFIBOOT_SOURCES = loadopt.c dp.c
 LIBEFIBOOT_OBJECTS = $(patsubst %.c,%.o,$(LIBEFIBOOT_SOURCES))
-LIBEFIVAR_SOURCES = dp.c dp-acpi.c dp-hw.c dp-media.c dp-message.c \
-	efivarfs.c error.c export.c guid.c guids.S guid-symbols.c \
-	lib.c vars.c
-LIBEFIVAR_OBJECTS = $(patsubst %.S,%.o,$(patsubst %.c,%.o,$(LIBEFIVAR_SOURCES)))
-EFIVAR_SOURCES = efivar.c
-GENERATED_SOURCES = include/efivar/efivar-guids.h guid-symbols.c
-MAKEGUIDS_SOURCES = makeguids.c guid.c
-ALL_SOURCES=$(LIBEFIBOOT_SOURCES) $(LIBEFIVAR_SOURCES) $(MAKEGUIDS_SOURCES) \
-	$(wildcard include/efivar/*.h) $(GENERATED_SOURCES) $(EFIVAR_SOURCES)
+ALL_SOURCES=$(LIBEFIBOOT_SOURCES) \
+	$(wildcard include/efivar/*.h)
 
 $(call deps-of,$(ALL_SOURCES)) : | deps
 -include $(call deps-of,$(ALL_SOURCES))
 
 all : $(TARGETS)
 
-./guid-symbols.c : include/efivar/efivar-guids.h
-./guids.bin : include/efivar/efivar-guids.h
-./names.bin : include/efivar/efivar-guids.h
-include/efivar/efivar-guids.h : makeguids guids.txt
-	./makeguids guids.txt guids.bin names.bin \
-		guid-symbols.c include/efivar/efivar-guids.h
-
-makeguids : CPPFLAGS+=-DEFIVAR_BUILD_ENVIRONMENT
-makeguids : LIBS=dl
-makeguids : $(MAKEGUIDS_SOURCES)
-
-guids.o : guids.S | guids.bin names.bin
-
-$(LIBEFIVAR_OBJECTS) $(LIBEFIBOOT_OBJECTS) : | $(GENERATED_SOURCES)
-
-libefivar.a : | $(GENERATED_SOURCES)
-libefivar.a : $(patsubst %.o,%.static.o,$(LIBEFIVAR_OBJECTS))
-
-libefivar.so : $(LIBEFIVAR_OBJECTS)
-libefivar.so : | $(GENERATED_SOURCES) libefivar.map
-libefivar.so : LIBS=dl
-libefivar.so : MAP=libefivar.map
-
-efivar : efivar.c | libefivar.so
-efivar : LIBS=efivar dl
-efivar : PKGS=popt
-
-efivar-static : efivar.c $(patsubst %.o,%.static.o,$(LIBEFIVAR_OBJECTS))
-efivar-static : | $(GENERATED_SOURCES)
-efivar-static : LIBS=dl
-efivar-static : PKGS=popt
-
 libefiboot.a : $(patsubst %.o,%.static.o,$(LIBEFIBOOT_OBJECTS))
-
-libefiboot.so : $(LIBEFIBOOT_OBJECTS)
-libefiboot.so : | libefiboot.map libefivar.so
-libefiboot.so : LIBS=efivar
-libefiboot.so : MAP=libefiboot.map
 
 deps : $(ALL_SOURCES)
 	$(MAKE) -f $(SRCDIR)/Make.deps deps SOURCES="$(ALL_SOURCES)"
@@ -95,8 +50,3 @@ test : all
 	$(MAKE) -C test $@
 
 .PHONY: test deps
-.SECONDARY : libefivar.so.1.$(VERSION) libefivar.so.1
-.SECONDARY : libefiboot.so.1.$(VERSION) libefivar.so.1
-.SECONDARY : include/efivar/efivar-guids.h guid-symbols.c
-.INTERMEDIATE : guids.bin names.bin
-.PRECIOUS : guid-symbols.o makeguids

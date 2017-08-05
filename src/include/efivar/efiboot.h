@@ -28,10 +28,11 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <byteswap.h>
+#include <sys/endian.h>
 
 #include <efivar.h>
 
+#include <efivar-dp.h>
 #include <efiboot-creator.h>
 #include <efiboot-loadopt.h>
 

@@ -20,10 +20,13 @@
 #ifndef _EFIVAR_INTERNAL_DP_H
 #define _EFIVAR_INTERNAL_DP_H
 
-#include <alloca.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <efivar-dp.h>
 
 #include "ucs2.h"
 
